@@ -1,0 +1,57 @@
+{
+  "name": "coolcloud",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@azure/arm-appservice": "^15.0.0",
+    "@azure/identity": "^4.3.0",
+    "@azure/msal-browser": "^3.17.0",
+    "@paypal/react-paypal-js": "^8.5.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "aws-amplify": "^6.3.6",
+    "aws-sdk": "^2.1638.0",
+    "axios": "^1.7.2",
+    "firebase": "^10.12.2",
+    "framer-motion": "^11.2.12",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.399.0",
+    "moment": "^2.30.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-firebase-hooks": "^5.1.1",
+    "react-icons": "^5.2.1",
+    "react-router": "^6.24.0",
+    "react-router-dom": "^6.24.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.4"
+  }
+}

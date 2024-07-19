@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a Node.js application on AWS EC2
+
+Parameters:
+  GitRepository:
+    Type: String
+    Description: URL of the Git repository containing the Node.js application
+  GitBranch:
+    Type: String
+    Description: Git branch to deploy
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    Description: EC2 instance type for the Node.js application
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: 'ami-04a81a99f5ec58529'
+    us-east-2:
+      AMI: 'ami-02d1e544b84bf7502'
+    us-west-1:
+      AMI: 'ami-0d9858aa3c6322f73'
+    us-west-2:
+      AMI: 'ami-098e42ae54c764c35'
+
+Resources:
+  NodeJSInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', AMI]
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref NodeJSSecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            # Enable logging and exit on error
+            exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+            set -e
+
+            # Update and install dependencies
+            sudo apt update
+            sudo apt install git -y
+
+            # Install Node.js
+            curl -fsSL https://deb.nodesource.com/setup_{{NODEJS_VERSION}} | sudo -E bash -
+            sudo apt-get install -y nodejs
+
+            # Clone the repository
+            git clone -b ${GitBranch} https://{{TOKEN}}@${GitRepository} /home/ubuntu/myrepository
+
+            # Install application dependencies and start the application
+            cd /home/ubuntu/myrepository
+            npm install
+            sudo npm install -g pm2
+            pm2 start {{STARTUP_COMMAND}}
+            pm2 save
+            pm2 startup systemd
+            sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+
+  NodeJSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP, SSH, and custom port for Node.js app
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 5500
+          ToPort: 5500
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  InstanceId:
+    Description: Instance ID of the deployed Node.js application
+    Value: !Ref NodeJSInstance
+  InstancePublicIP:
+    Description: Public IP address of the deployed Node.js application
+    Value: !GetAtt NodeJSInstance.PublicIp
